@@ -67,6 +67,26 @@ app.delete('/api/persons/:id', (req, res)=>{
     persons = persons.filter(p => p.id !== id )
     res.status(204).end()
 })
+const generateId = ()=>{
+    const newId = Math.floor(Math.random()* 10000)
+    return newId
+}
+app.post('/api/persons/', (req,res)=>{
+    const body = req.body;
+    if(!body.name || !body.number){
+        return res.status(400).json({
+            error: 'both name and number are required'
+        })
+    }
+    const person =  {
+        name: body.name,
+        number: body.number,
+        id: generateId()
+    }
+
+    persons.concat(person)
+    res.json(person)
+})
 
 const PORT = 3001;
 app.listen(PORT, () =>{
