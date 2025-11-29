@@ -1,8 +1,26 @@
 const express = require('express');
+const morgan = require('morgan')
 
 const app = express();
 
 app.use(express.json());
+
+morgan.token('body', (req)=>{
+    if (req.method ===  'POST'){
+        return JSON.stringify(req.body)
+    }
+    return ''
+})
+app.use(morgan((tokens, req, res)=>{
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'), '-',
+        tokens['response-time'](req, res),'ms',
+        tokens.body(req,res)
+    ].join(' ')
+}));
 
 let persons = [
     { 
@@ -28,26 +46,26 @@ let persons = [
 ];
 
 
-app.get('/', (request, response) => {
-    response.send(`
+app.get('/', (req, res) => {
+    res.send(`
         <h1>Welcome to your phonebook</h1>
         <p1>/api/notes on the same port to see all your contacts</p1>s
         `);
 });
 
-app.get('/api/persons', (request, response)=>{
-    response.json(persons);
+app.get('/api/persons', (req, res)=>{
+    res.json(persons);
 });
 
-app.get('/api/info', (request, response)=>{
+app.get('/api/info', (req, res)=>{
     const timeStamp = new Date;
-    response.send(`
+    res.send(`
         <p>phonebook has info for ${persons.length}</p>
         <p>${timeStamp.toString()}</>
         `)
 
 
-    response.send();
+    res.send();
 });
 
 app.get('/api/persons/:id', (req, res)=>{
