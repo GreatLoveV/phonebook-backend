@@ -1,4 +1,3 @@
-const { urlencoded } = require('express');
 const mongoose = require('mongoose');
 
 if (process.argv.length <3){
@@ -9,11 +8,11 @@ const name = process.argv[3];
 const number = process.argv[4];
 const password = encodeURIComponent(process.argv[2]);
 
-url = `mongodb+srv://sleuthInk531090:${password}@cluster0.ysghu4p.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`;
+const url = `mongodb+srv://sleuthInk531090:${password}@cluster0.ysghu4p.mongodb.net/phonebook?retryWrites=true&w=majority&appName=Cluster0`;
 
 mongoose.connect(url, {family: 4});
 
-const contactSchema = mongoose.Schema({
+const personSchema = mongoose.Schema({
     name:{
         type:String,
         required: true
@@ -24,14 +23,14 @@ const contactSchema = mongoose.Schema({
     },
     date: {
         type: Date,
-        date: Date.now
+        default: Date.now
     }
 });
 
-const Contact = mongoose.model('Contact', contactSchema);
+const Person = mongoose.model('Person', personSchema);
 
 
-const person = new Contact({
+const person = new Person({
     name: name,
     number: number,
     date: new Date()
@@ -42,7 +41,7 @@ if (person.name && person.number){
     mongoose.connection.close()
 });
 }else{
-    Contact
+    Person
     .find({})
     .then(persons =>{
         console.log('phonebook');
