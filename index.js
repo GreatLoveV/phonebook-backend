@@ -13,6 +13,7 @@ morgan.token('body', (req)=>{
     }
     return ''
 })
+
 app.use(morgan((tokens, req, res)=>{
     return [
         tokens.method(req, res),
@@ -51,7 +52,7 @@ let persons = [
 app.get('/', (req, res) => {
     res.send(`
         <h1>Welcome to your phonebook</h1>
-        <p1>/api/notes on the same port to see all your contacts</p1>s
+        <p1>/api/notes on the same port to see all your contacts</p1>
         `);
 });
 
@@ -72,7 +73,7 @@ app.get('/api/info', (req, res)=>{
     }).catch(error => {
         res.status(500).send({error: 'Error fetching data'})
     })
-    
+
 });
 
 app.get('/api/persons/:id', (req, res, next)=>{
@@ -81,7 +82,6 @@ app.get('/api/persons/:id', (req, res, next)=>{
     })
         .catch(error => next(error))
     
-
 })
 
 app.delete('/api/persons/:id', (req, res, next)=>{
@@ -115,19 +115,8 @@ app.put('/api/persons/:id' , (req, res, next) =>{
 })
 
 
-app.post('/api/persons/', (req,res)=>{
+app.post('/api/persons/', (req,res,next)=>{
     const body = req.body;
-    // const existingContact = persons.find(p => p.name === body.name);
-    // if(!body.name || !body.number){
-    //     return res.status(400).json({
-    //         error: 'both name or number is missing'
-    //     })
-    // }
-    // if(existingContact){
-    //     return res.status(400).json({
-    //         error: 'name must be unique'
-    //     })
-    // }
 
     const person = new Person({
         name: body.name,
@@ -137,7 +126,9 @@ app.post('/api/persons/', (req,res)=>{
     person.save().then(savedPerson=>{
         res.json(savedPerson)
     })
+        .catch(error => next(error))
 })
+
 const unknownEndpoint = (req, res) =>{
     res.status(404).send({error: 'unknown endpoint'})
 }
@@ -148,8 +139,13 @@ app.use(unknownEndpoint)
 const errorHandler = (error, req, res, next) => {
     console.error(error.message)
 
-    if (error.name = 'CastError'){
+    if (error.name === 'CastError'){
         return res.status(400).send({error: "malformatted id"})    
+    } 
+    
+    if (error.name === 'ValidationError'){
+        const firstError = Object.values(error.errors)[0].message;
+        return res.status(400).json({error: firstError})
     }
 
     return next(error)
